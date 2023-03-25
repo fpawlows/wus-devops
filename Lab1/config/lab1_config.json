@@ -1,0 +1,25 @@
+{
+    "resource_group_name": "wusLab1Group",
+    "location": "westeurope",
+    "network": {
+        "address_prefix": "10.40.0.0/16",
+        "security_group": []
+    },
+    "subnets": [
+        {
+            "backend": {
+                "port": 8088
+            }
+        },
+        {
+            "frontend": {
+                "port": 8088
+            }
+        },
+        {
+            "database": {
+                "port": 3306
+            }
+        }
+    ]
+}
