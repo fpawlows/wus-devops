@@ -2,23 +2,58 @@
     "resource_group_name": "wusLab1Group",
     "location": "westeurope",
     "network": {
+        "name": "Frontend_subnet",
         "address_prefix": "10.40.0.0/16",
         "security_group": []
     },
-    "subnets": [
+    "deployments": [
         {
-            "backend": {
-                "port": 8088
+            "name": "backend",
+            "subnet": {
+                "port": 8080, 
+                "nsg_rules": []
+            },
+            "virtual_machine": {
+                "private_IP_address": "10.40.0.1.10",
+                "public_ip": "backend",
+                "deploy": [{
+                    "database_ip": "10.40.0.1.10",
+                    "database_port": 3306,
+                    "database_user": "user",
+                    "database_password": "password"
+                }]
+                
             }
         },
         {
-            "frontend": {
-                "port": 8088
+            "name": "frontend",
+            "subnet": {
+                "port": 8080, 
+                "nsg_rules": []
+            },
+            "virtual_machine": {
+                "private_IP_address": "10.40.0.1.10",
+                "public_ip": "frontend",
+                "deploy": [{
+                    "backend_address": "backend",
+                    "backend_port": 8080
+                }]
+                
             }
         },
         {
-            "database": {
-                "port": 3306
+            "name": "database",
+            "subnet": {
+                "port": 3306, 
+                "nsg_rules": []
+            },
+            "virtual_machine": {
+                "private_IP_address": "10.40.0.1.10",
+                "public_ip": "",
+                "deploy": [{
+                    "user": "user",
+                    "password": "password"
+                }]
             }
         }
     ]
