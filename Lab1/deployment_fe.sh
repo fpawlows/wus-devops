@@ -20,21 +20,4 @@ cd spring-petclinic-angular
 npm install 
 npm install -g angular-http-server
 npm run build -- --prod
-#---------
-
-sudo apt install npm
-sudo apt install nginx
-
-npm uninstall -g angular-cli @angular/cli
-npm cache verify
-npm install -g @angular/cli@latest
-rm package-lock.json
-npm install
-
-sudo npm install -g n
-sudo n stable
-hash -r
-cd spring-petclinic-angular/
-sudo npm link @angular/cli
-cd spring-petclinic-angular/
-npm install
+npx angular-http-server --path ./dist # TODO add port once we have VMs set up
