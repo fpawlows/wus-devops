@@ -2,10 +2,10 @@
     "resource_group_name": "wusLab1Group",
     "location": "westeurope",
     "network": {
-        "name": "Frontend_subnet",
-        "address_prefix": "10.40.0.0/16",
-        "security_group": []
+        "name": "Lab1Network",
+        "address_prefix": "10.40.0.0/16"
     },
+    
     "deployments": [
         {
             "name": "backend",
@@ -14,7 +14,7 @@
                 "nsg_rules": []
             },
             "virtual_machine": {
-                "private_IP_address": "10.40.0.1.10",
+                "private_ip_address": "10.40.0.1.10",
                 "public_ip": "backend",
                 "deploy": [{
                     "database_ip": "10.40.0.1.10",
@@ -32,7 +32,7 @@
                 "nsg_rules": []
             },
             "virtual_machine": {
-                "private_IP_address": "10.40.0.1.10",
+                "private_ip_address": "10.40.0.1.10",
                 "public_ip": "frontend",
                 "deploy": [{
                     "backend_address": "backend",
@@ -48,7 +48,7 @@
                 "nsg_rules": []
             },
             "virtual_machine": {
-                "private_IP_address": "10.40.0.1.10",
+                "private_ip_address": "10.40.0.1.10",
                 "public_ip": "",
                 "deploy": [{
                     "user": "user",
