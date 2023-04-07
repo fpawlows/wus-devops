@@ -1,3 +1,9 @@
+if [ $# -ne 1 ]; then
+    echo "Correct usage: $0 [port]"
+fi
+
+PORT=$1
+
 sudo apt-get update
 sudo apt-get upgrade -y
 
@@ -7,6 +13,7 @@ sudo apt install curl -y
 sudo apt install nodejs -y
 sudo apt install nginx -y
 # sudo apt install npm -y # why not????
+
 
 # ...why??? https://github.com/nvm-sh/nvm/issues/2432
 export NVM_DIR="$HOME/.nvm"
@@ -20,4 +27,4 @@ cd spring-petclinic-angular
 npm install 
 npm install -g angular-http-server
 npm run build -- --prod
-npx angular-http-server --path ./dist # TODO add port once we have VMs set up
+npx angular-http-server --path ./dist -p $PORT # TODO add port once we have VMs set up

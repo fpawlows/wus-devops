@@ -6,11 +6,11 @@ if [ $# -ne 1 ]; then
 fi
 
 # Set up the environment
-sudo apt-get update
-sudo apt-get upgrade -y
+# sudo apt-get update
+# sudo apt-get upgrade -y
 
-sudo apt install jq -y
-sudo apt-get install azure-cli -y
+# sudo apt install jq -y
+# sudo apt-get install azure-cli -y
 
 # Login to Azure
 az login
@@ -104,27 +104,29 @@ for DEPLOYMENT in "${DEPLOYMENTS[@]}"; do
     #TODO uncomment once we know VMs are properly configured
     # readarray -t DEPLOY < <(jq -c '.deploy[]' <<< $DEPLOYMENT)
     # for SERVICE in "${DEPLOY[@]}"; do
-    #     case $DEPLOYMENT_NAME in
-    #         frontend)
-    #             echo Performing frontend setup...
+    case $DEPLOYMENT_NAME in
+        frontend)
+            echo Performing frontend setup...
 
-    #             az vm run-command invoke \
-    #                 --resource-group $RESOURCE_GROUP_NAME \ 
-    #                 --name $VM_NAME \
-    #                 --scripts "@./deployment_fe.sh"
-    #                 # --command-id RunShellScript \
-    #     ;;
-    #         backend)
-    #             echo Performing backend setup...
-    #             az vm run-command invoke \
-    #                 --resource-group $RESOURCE_GROUP_NAME \ 
-    #                 --name $VM_NAME \
-    #                 --scripts "@./deployment_be.sh"
-    #     ;;
-    #         *)
-    #             echo Unknown setup $DEPLOYMENT_NAME
-    #     ;;
-    #     esac
+            az vm run-command invoke \
+                --resource-group $RESOURCE_GROUP_NAME \ 
+                --name $VM_NAME \
+                --command-id RunShellScript \
+                --scripts "@./deployment_fe.sh" \
+                --parameters "$PORT"
+    ;;
+        backend)
+            echo Performing backend setup...
+            az vm run-command invoke \
+                --resource-group $RESOURCE_GROUP_NAME \ 
+                --name $VM_NAME \
+                --command-id RunShellScript \
+                --scripts "@./deployment_be.sh"
+    ;;
+        *)
+            echo Unknown setup $DEPLOYMENT_NAME
+    ;;
+    esac
     # done
 done
 
