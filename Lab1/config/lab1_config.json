@@ -10,14 +10,15 @@
         {
             "name": "backend",
             "subnet": {
-                "port": 8080, 
+                "port": 8080,
+                "address_prefixes": "10.40.1.0/24", 
                 "nsg_rules": []
             },
             "virtual_machine": {
-                "private_ip_address": "10.40.0.1.10",
+                "private_ip_address": "10.40.1.8",
                 "public_ip": "backend",
                 "deploy": [{
-                    "database_ip": "10.40.0.1.10",
+                    "database_ip": "10.40.3.8",
                     "database_port": 3306,
                     "database_user": "user",
                     "database_password": "password"
@@ -29,10 +30,11 @@
             "name": "frontend",
             "subnet": {
                 "port": 8080, 
+                "address_prefixes": "10.40.2.0/24", 
                 "nsg_rules": []
             },
             "virtual_machine": {
-                "private_ip_address": "10.40.0.1.10",
+                "private_ip_address": "10.40.2.8",
                 "public_ip": "frontend",
                 "deploy": [{
                     "backend_address": "backend",
@@ -45,10 +47,11 @@
             "name": "database",
             "subnet": {
                 "port": 3306, 
+                "address_prefixes": "10.40.3.0/24", 
                 "nsg_rules": []
             },
             "virtual_machine": {
-                "private_ip_address": "10.40.0.1.10",
+                "private_ip_address": "10.40.3.8",
                 "public_ip": "",
                 "deploy": [{
                     "user": "user",

@@ -14,7 +14,7 @@ az login
 CONFIG_FILE="$1"
 RESOURCE_GROUP_NAME="$(jq -r '.resource_group_name' "$CONFIG_FILE")"
 LOCATION="$(jq -r '.location' "$CONFIG_FILE")"
-# TODO these need to be different for every network
+# TODO these need to be different for every network... or do they?
 NETWORK_ADDR_PREFIX="$(jq -r '.network.address_prefix' "$CONFIG_FILE")"
 NETWORK_NAME="$(jq -r '.network.name' "$CONFIG_FILE")"
 
@@ -47,7 +47,8 @@ for DEPLOYMENT in "${DEPLOYMENTS[@]}"; do
     #for RULE in "${RULES}"; do
     #    echo $RULE
 
-    PORT=$(jq -c '.subnet.port' <<< "$DEPLOYMENT")   
+    PORT=$(jq -c '.subnet.port' <<< "$DEPLOYMENT")
+    SUBNET_ADDR_PREFIXES=$(jq -r '.subnet.address_prefixes' <<< "$DEPLOYMENT")
 
     az network nsg rule create \
         --resource-group $RESOURCE_GROUP_NAME \
@@ -64,30 +65,35 @@ for DEPLOYMENT in "${DEPLOYMENTS[@]}"; do
     az network vnet subnet create \
         --resource-group $RESOURCE_GROUP_NAME \
         --vnet-name $NETWORK_NAME \
-        --name $SUBNET_NAME 
+        --network-security-group $NSG_NAME \
+        --name $SUBNET_NAME \
+        --address-prefixes $SUBNET_ADDR_PREFIXES
 
-    echo $DEPLOYMENT_NAME Public ips creation
-    # TODO acquire real address and read it here. Also check if not empty
-    PUBLIC_IP=$(jq -r '.subnet.public_ip' <<< "$DEPLOYMENT")
+    echo $DEPLOYMENT_NAME public ips creation
+    # TODO acquire real address
+    PUBLIC_IP=$(jq -r '.virtual_machine.public_ip' <<< "$DEPLOYMENT")
 
-    az network public-ip create \
-        --resource-group $RESOURCE_GROUP_NAME \
-        --name $PUBLIC_IP
+    if [[ ! -z "$PUBLIC_IP" ]]; then
+        az network public-ip create \
+            --resource-group $RESOURCE_GROUP_NAME \
+            --name $PUBLIC_IP
+    fi
 
     echo $DEPLOYMENT_NAME VM creation
     VM_PRIVATE_IP_ADDRESS=$(jq -r '.virtual_machine.private_ip_address' <<< "$DEPLOYMENT")
-    VM_PUBLIC_IP_ADDRESS=$(jq -r '.virtual_machine.public_ip_address' <<< "$DEPLOYMENT")
     VM_NAME="${DEPLOYMENT_NAME}VM"
+    # TODO check side effects of :- notation
     az vm create \
         --resource-group $RESOURCE_GROUP_NAME \
         --vnet-name $NETWORK_NAME \
         --name $VM_NAME \
         --subnet $SUBNET_NAME \
-        --nsg "" \
+        --nsg $NSG_NAME \
         --private-ip-address $VM_PRIVATE_IP_ADDRESS \
-        --public-ip-address $VM_PUBLIC_IP_ADDRESS \
+        --public-ip-address "${PUBLIC_IP:-}" \
         --image UbuntuLTS \
         --generate-ssh-keys
+    
         #TODO sizes and loop "vm create" over deployments for be/fe/db
 
     #TODO uncomment once we know VMs are properly configured
