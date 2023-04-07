@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ $# -ne 1 ]; then
+    echo "Correct usage: $0 path/to/config.json"
+    exit 1
+fi
+
 # Set up the environment
 sudo apt-get update
 sudo apt-get upgrade -y
@@ -122,3 +127,5 @@ for DEPLOYMENT in "${DEPLOYMENTS[@]}"; do
     #     esac
     # done
 done
+
+az logout
