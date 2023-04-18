@@ -21,6 +21,6 @@ wget $POPULATE_DB
 # sudo mysql -e "CREATE USER 'pc'@'%' IDENTIFIED BY 'pc';"
 # sudo mysql -e "GRANT ALL ON *.* To 'pc'@'%' WITH GRANT OPTION;"
 
-perl -0777 -i.original -pe 's/GRANT ALL PRIVILEGES ON petclinic.* TO pc\@% IDENTIFIED BY \x27pc\x27;/CREATE USER \x27pc\x27\@\x27%\x27 IDENTIFIED BY \x27pc\x27;\nGRANT ALL PRIVILEGES ON petclinic.* TO \x27pc\x27\@\x27%\x27;/igs' initDB.sql
+perl -0777 -i.original -pe 's/GRANT ALL PRIVILEGES ON petclinic.* TO pc\@localhost IDENTIFIED BY \x27pc\x27;/CREATE USER \x27pc\x27\@\%\x27 IDENTIFIED BY \x27pc\x27;\nGRANT ALL PRIVILEGES ON petclinic.* TO \x27pc\x27\@\%\x27;/igs' initDB.sql
 sudo mysql < ./initDB.sql
 sudo mysql petclinic < ./populateDB.sql 
