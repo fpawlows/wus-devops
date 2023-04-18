@@ -12,7 +12,6 @@ sudo apt install git -y
 sudo apt install curl -y
 sudo apt install nodejs -y
 sudo apt install nginx -y
-sudo apt install npm -y # why not????
 
 curl -sL https://deb.nodesource.com/setup_16.x | sudo bash -
 
