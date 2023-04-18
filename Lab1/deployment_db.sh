@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ $# -ne 3 ]; then
+if [ $# -ne 2 ]; then
     echo "Correct usage: $0 DATABASE_USER DATABASE_PASSWORD "
     exit 1
 fi
@@ -22,7 +22,6 @@ wget $POPULATE_DB
 # sudo mysql -e "GRANT ALL ON *.* To 'pc'@'%' WITH GRANT OPTION;"
 
 perl -0777 -i.original -pe 's/GRANT ALL PRIVILEGES ON petclinic.* TO pc\@localhost IDENTIFIED BY \x27pc\x27;/CREATE USER \x27pc\x27\@\x27localhost\x27 IDENTIFIED BY \x27pc\x27;\nGRANT ALL PRIVILEGES ON petclinic.* TO \x27pc\x27\@\x27localhost\x27;/igs' initDB.sql
-cat ./initDB.sql | sudo mysql -f
-cat ./populateDB.sql | sudo mysql -f
 
+sudo mysql < ./populateDB.sql 
 sudo mysql < ./initDB.sql
