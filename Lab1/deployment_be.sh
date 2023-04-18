@@ -9,8 +9,6 @@ if [ $# -lt 2 ]; then
   exit 2 
 fi
 
-wiesz co w mysql properties tez jest w poetclinic
-
 DATABASE_ADDRESS=$1
 DATABASE_PORT=$2
 DATABASE_USER=$3
@@ -23,7 +21,6 @@ sudo apt install git -y
 sudo apt install openjdk-17-jdk openjdk-17-jre -y
 
 git clone https://github.com/spring-petclinic/spring-petclinic-rest.git
-cd spring-petclinic-rest
 
 SPRING_PROP="./spring-petclinic-rest/src/main/resources/application.properties"
 MYSQL_PROP="./spring-petclinic-rest/src/main/resources/application-mysql.properties"
@@ -35,4 +32,7 @@ sed -i "s/localhost:3306/$DATABASE_ADDRESS:$DATABASE_PORT/g" $MYSQL_PROP
 sed -i "s/spring.datasource.username=pc/spring.datasource.username=$DATABASE_USER/g" $MYSQL_PROP
 sed -i "s/spring.datasource.password=petclinic/spring.datasource.password=$DATABASE_PASSWORD/g" $MYSQL_PROP
 
+cat $MYSQL_PROP >> $SPRING_PROP
+
+cd spring-petclinic-rest
 ./mvnw spring-boot:run
