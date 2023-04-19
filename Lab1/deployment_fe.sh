@@ -1,9 +1,13 @@
 if [ $# -ne 1 ]; then
-    echo "Correct usage: $0 [port]"
+    echo "Correct usage: $0 PORT BACKEND_IP BACKEND_PORT"
     exit 1
 fi
 
-PORT=$1
+PORT="$1"
+BACKEND_IP="$2"
+BACKEND_PORT="$3"
+
+
 
 sudo apt-get update
 sudo apt-get upgrade -y
@@ -25,6 +29,11 @@ export NVM_DIR="$HOME/.nvm"
 nvm install 16
 git clone https://github.com/spring-petclinic/spring-petclinic-angular
 cd spring-petclinic-angular
+
+
+# Update configuration
+sed -i "s/localhost/$BACKEND_IP/g" src/environments/environment.ts src/environments/environment.prod.ts
+sed -i "s/9966/$BACKEND_PORT/g" src/environments/environment.ts src/environments/environment.prod.ts
 
 npm install 
 npm install -g angular-http-server

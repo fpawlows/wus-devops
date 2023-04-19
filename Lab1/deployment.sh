@@ -101,33 +101,75 @@ for DEPLOYMENT in "${DEPLOYMENTS[@]}"; do
     
         #TODO sizes and loop "vm create" over deployments for be/fe/db
 
-    #TODO uncomment once we know VMs are properly configured
-    # readarray -t DEPLOY < <(jq -c '.deploy[]' <<< $DEPLOYMENT)
-    # for SERVICE in "${DEPLOY[@]}"; do
-    case $DEPLOYMENT_NAME in
-        frontend)
-            echo Performing frontend setup...
+    readarray -t SERVICES < <(jq -c '.virtual_machine.services[]' <<< $DEPLOYMENT)
+    for SERVICE in "${SERVICES[@]}"; do
+    
+        echo $SERVICE
+        SERVICE_NAME=$(jq -r '.name' <<< "$SERVICE")
 
-            az vm run-command invoke \
-                --resource-group $RESOURCE_GROUP_NAME \ 
-                --name $VM_NAME \
-                --command-id RunShellScript \
-                --scripts "@./deployment_fe.sh" \
-                --parameters "$PORT"
-    ;;
-        backend)
-            echo Performing backend setup...
-            az vm run-command invoke \
-                --resource-group $RESOURCE_GROUP_NAME \ 
-                --name $VM_NAME \
-                --command-id RunShellScript \
-                --scripts "@./deployment_be.sh"
-    ;;
-        *)
-            echo Unknown setup $DEPLOYMENT_NAME
-    ;;
-    esac
-    # done
+        case $SERVICE_NAME in
+            frontend)
+                echo Performing frontend setup...
+            
+                BACKEND_IP=$(jq -r '.backend_address' <<< "$SERVICE")
+                BACKEND_PORT=$(jq -r '.backend_port' <<< "$SERVICE")
+
+                az vm run-command invoke \
+                    --resource-group $RESOURCE_GROUP_NAME \
+                    --name $VM_NAME \
+                    --command-id RunShellScript \
+                    --scripts "@./deployment_fe.sh" \
+                    --parameters "$PORT" "$BACKEND_IP" "$BACKEND_PORT"
+                    # To be changed - $port for each service
+
+
+        ;;
+            backend)
+                echo Performing backend setup...
+            
+                DATABASE_ADDRESS=$(jq -r '.database_address' <<< "$SERVICE")
+                DATABASE_PORT=$(jq -r '.database_port' <<< "$SERVICE")
+                DATABASE_USER=$(jq -r '.database_user' <<< "$SERVICE")
+                DATABASE_PASSWORD=$(jq -r '.database_password' <<< "$SERVICE")
+                
+                az vm run-command invoke \
+                    --resource-group $RESOURCE_GROUP_NAME \
+                    --name $VM_NAME \
+                    --command-id RunShellScript \
+                    --scripts "@./deployment_be.sh" "$DATABASE_ADDRESS", "$DATABASE_PORT", "$DATABASE_USER", "$DATABASE_PASSWORD"
+    
+        ;;
+            database)
+                echo Setting up database
+
+                DATABASE_USER=$(jq -r '.user' <<< $SERVICE)
+                DATABASE_PASSWORD=$(jq -r '.password' <<< $SERVICE)
+
+                az vm run-command invoke \
+                    --resource-group $RESOURCE_GROUP_NAME \
+                    --name $VM_NAME \
+                    --command-id RunShellScript \
+                    --scripts "@./mySql/sql.sh" \
+                    --parameters "$SERVICE_PORT" "$DATABASE_USER" "$DATABASE_PASSWORD"
+
+        ;;
+            *)
+                echo Unknown setup $DEPLOYMENT_NAME
+        ;;
+        esac
+
+        echo $SERVICE_NAME on address $PUBLIC_IP : $PORT
+    done
+
+    # Show public IPs
+    echo $DEPLOYMENT_NAME IP Address: 
+    az network public-ip show \
+      --resource-group "$RESOURCE_GROUP_NAME" \
+      --name "$PUBLIC_IP" \
+      --query "ipAddress" \
+      --output tsv
+
 done
+
 
 az logout
