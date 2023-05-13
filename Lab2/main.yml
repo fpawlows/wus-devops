@@ -63,6 +63,11 @@
         security_group_name: my-nsg
       register: nic_result
 
+    # - name: Debug nic_result variable
+    #   debug:
+    #     var: nic_result
+
+
     - name: Create a virtual machine
       azure.azcollection.azure_rm_virtualmachine:
         resource_group: "{{ resource_group }}"
@@ -75,5 +80,5 @@
           publisher: "{{ image_publisher }}"
           sku: "{{ image_sku }}"
           version: latest
-        network_interfaces: "{{ nic_result }}"
+        network_interfaces: "{{ nic_result.state.name }}"
       register: vm_result
