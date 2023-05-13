@@ -1,0 +1,80 @@
+---
+- name: Deploy a virtual machine on Azure
+  hosts: localhost
+  connection: local
+  vars:
+    resource_group: my-resource-group
+    vm_name: my-vm
+    vm_size: Standard_DS1_v2
+    admin_username: azureuser
+    admin_password: P@ssw0rd123!
+    image_publisher: Canonical
+    image_offer: UbuntuServer
+    image_sku: 16.04-LTS
+  tasks:
+    - name: Create a resource group
+      azure.azcollection.azure_rm_resourcegroup:
+        name: "{{ resource_group }}"
+        location: eastus
+      register: rg_result
+
+    - name: Create a virtual network
+      azure.azcollection.azure_rm_virtualnetwork:
+        resource_group: "{{ resource_group }}"
+        name: my-vnet
+        address_prefixes: "10.0.0.0/16"
+      register: vnet_result
+
+    - name: Create a subnet
+      azure.azcollection.azure_rm_subnet:
+        resource_group: "{{ resource_group }}"
+        name: my-subnet
+        address_prefix: "10.0.0.0/24"
+        virtual_network_name: my-vnet
+      register: subnet_result
+
+    - name: Create a public IP address
+      azure.azcollection.azure_rm_publicipaddress:
+        resource_group: "{{ resource_group }}"
+        name: my-public-ip
+        allocation_method: Static
+      register: public_ip_result
+
+    - name: Create a network security group
+      azure.azcollection.azure_rm_securitygroup:
+        resource_group: "{{ resource_group }}"
+        name: my-nsg
+        rules:
+          - name: allow_ssh
+            protocol: Tcp
+            destination_port_range: "22"
+            access: Allow
+            direction: Inbound
+      register: nsg_result
+
+    - name: Create a network interface
+      azure.azcollection.azure_rm_networkinterface:
+        resource_group: "{{ resource_group }}"
+        name: my-nic
+        virtual_network_name: my-vnet
+        subnet_name: my-subnet
+        public_ip_name: my-public-ip
+        security_group_name: my-nsg
+        priority: 1000
+      register: nic_result
+
+    - name: Create a virtual machine
+      azure.azcollection.azure_rm_virtualmachine:
+        resource_group: "{{ resource_group }}"
+        name: "{{ vm_name }}"
+        vm_size: "{{ vm_size }}"
+        admin_username: "{{ admin_username }}"
+        admin_password: "{{ admin_password }}"
+        image:
+          offer: "{{ image_offer }}"
+          publisher: "{{ image_publisher }}"
+          sku: "{{ image_sku }}"
+          version: latest
+        network_interfaces:
+          - id: "{{ nic_result.id }}"
+      register: vm_result
