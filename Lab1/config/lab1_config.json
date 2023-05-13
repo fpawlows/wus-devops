@@ -8,16 +8,49 @@
     
     "deployments": [
         {
+            "name": "database",
+            "subnet": {
+                "port": 3306, 
+                "address_prefixes": "10.40.3.0/24", 
+                "nsg_rules": [{
+                    "name": "databaseRule",
+                    "priority": 900,
+                    "source_address_prefixes": "10.40.0.0/16",
+                    "source_port_ranges": "*",
+                    "destination_address_prefixes": "*",
+                    "destination_port_ranges": 3306
+                }]
+            },
+            "virtual_machine": {
+                "private_ip_address": "10.40.3.8",
+                "public_ip": "",
+                "services": [{
+                    "name": "database",
+                    "user": "user",
+                    "password": "password"
+                }]
+            }
+        },
+        {
             "name": "backend",
             "subnet": {
                 "port": 8080,
                 "address_prefixes": "10.40.1.0/24", 
-                "nsg_rules": []
+                "nsg_rules": [
+                    {
+                        "name": "backendRule",
+                        "priority": 900,
+                        "source_address_prefixes": "*",
+                        "source_port_ranges": "*",
+                        "destination_address_prefixes": "*",
+                        "destination_port_ranges": 8080
+                    }]
             },
             "virtual_machine": {
                 "private_ip_address": "10.40.1.8",
                 "public_ip": "backend",
-                "deploy": [{
+                "services": [{
+                    "name": "backend",
                     "database_ip": "10.40.3.8",
                     "database_port": 3306,
                     "database_user": "user",
@@ -31,32 +64,25 @@
             "subnet": {
                 "port": 8080, 
                 "address_prefixes": "10.40.2.0/24", 
-                "nsg_rules": []
+                "nsg_rules": [
+                    {
+                        "name": "frontRule",
+                        "priority": 900,
+                        "source_address_prefixes": "*",
+                        "source_port_ranges": "*",
+                        "destination_address_prefixes": "*",
+                        "destination_port_ranges": 8080
+                    }]
             },
             "virtual_machine": {
                 "private_ip_address": "10.40.2.8",
                 "public_ip": "frontend",
-                "deploy": [{
+                "services": [{
+                    "name": "frontend",
                     "backend_address": "backend",
                     "backend_port": 8080
                 }]
                 
-            }
-        },
-        {
-            "name": "database",
-            "subnet": {
-                "port": 3306, 
-                "address_prefixes": "10.40.3.0/24", 
-                "nsg_rules": []
-            },
-            "virtual_machine": {
-                "private_ip_address": "10.40.3.8",
-                "public_ip": "",
-                "deploy": [{
-                    "user": "user",
-                    "password": "password"
-                }]
             }
         }
     ]
