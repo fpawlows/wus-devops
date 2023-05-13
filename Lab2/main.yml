@@ -15,7 +15,7 @@
     - name: Create a resource group
       azure.azcollection.azure_rm_resourcegroup:
         name: "{{ resource_group }}"
-        location: eastus
+        location: westeurope
       register: rg_result
 
     - name: Create a virtual network
@@ -50,6 +50,7 @@
             destination_port_range: "22"
             access: Allow
             direction: Inbound
+            priority: 1000
       register: nsg_result
 
     - name: Create a network interface
@@ -60,7 +61,6 @@
         subnet_name: my-subnet
         public_ip_name: my-public-ip
         security_group_name: my-nsg
-        priority: 1000
       register: nic_result
 
     - name: Create a virtual machine
@@ -75,6 +75,5 @@
           publisher: "{{ image_publisher }}"
           sku: "{{ image_sku }}"
           version: latest
-        network_interfaces:
-          - id: "{{ nic_result.id }}"
+        network_interfaces: "{{ nic_result }}"
       register: vm_result
