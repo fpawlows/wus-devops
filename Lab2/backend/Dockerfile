@@ -12,6 +12,8 @@ ARG BACKEND_PORT
 
 # ENV SPRING_PROFILES_ACTIVE="mysql,spring-data-jpa" 
 ENV SERVER_PORT=$BACKEND_PORT
+# Spring uses this enviroment variable to publish the service on this port
+
 
 # ENTRYPOINT SPRING_DATASOURCE_URL="jdbc:mysql://${DB_ADDRESS}:${DB_PORT}/petclinic?useUnicode=true" mvn spring-boot:run
 ENTRYPOINT mvn spring-boot:run
