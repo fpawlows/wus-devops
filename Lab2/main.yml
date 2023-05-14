@@ -90,8 +90,10 @@
         resource_group: "{{ resource_group }}"
         name: "{{item.name}}IP"
         allocation_method: Static
-      # register: public_ip_result
+      register: public_ip_result
       loop: "{{deployments}}"
+    # - debug: 
+    #     var: public_ip_result
 
     - name: Create a network security group
       azure.azcollection.azure_rm_securitygroup:
@@ -153,5 +155,29 @@
           sku: "{{ image_sku }}"
           version: latest
         network_interfaces: "{{item.name}}NIC"
-      # register: vm_result
       loop: "{{deployments}}"
+      register: vm_results
+    
+    # - name: Debug
+    #   debug:
+    #     var: vm_results.results
+
+    - name: Update apt
+      # become: yes
+      command: touch dupa
+      delegate_to: "{{item.name}}IP"
+    #   vars:
+    #     ansible_become_password: "{{ admin_password }}"
+      loop: "{{deployments}}"
+#       apt:
+#         name: xd
+#         # update_cache: yes
+#         upgrade: yes
+#       delegate_to: "140.115.159.99"
+#         # ansible_ssh_user: myuser
+#         # ansible_ssh_pass: mypassword
+#       # delegate_to: "{{ item.name }}IP"
+#       # with_items: "{{deployments}}" 
+    
+
+
