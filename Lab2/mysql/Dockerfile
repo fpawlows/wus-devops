@@ -1,17 +1,16 @@
-FROM mysql:5.7.42-debian
-ENV MYSQL_ROOT_PASSWORD=petclinic
-ENV MYSQL_USER=pc
-ENV MYSQL_PASSWORD=petclinic
-ENV MYSQL_DATABASE=petclinic
+# WILL RUN ON PORT 3306
 
-ARG MYSQL_PORT=4003
-ENV MYSQL_TCP_PORT=$MYSQL_PORT
+FROM mysql:8.0.31 as build-env
 
-# Download service database initial files
-RUN apt-get update && apt-get upgrade -y \
-&& apt-get install wget -y \
-&& mkdir /docker-entrypoint-initdb.d -p \
-&& cd /docker-entrypoint-initdb.d \
-&& wget "https://raw.githubusercontent.com/spring-petclinic/spring-petclinic-rest/master/src/main/resources/db/mysql/initDB.sql" \
-&& wget "https://raw.githubusercontent.com/spring-petclinic/spring-petclinic-rest/master/src/main/resources/db/mysql/populateDB.sql" \
-&& cd -
+RUN curl \
+    https://raw.githubusercontent.com/spring-petclinic/spring-petclinic-rest/master/src/main/resources/db/mysql/initDB.sql \
+    | sed 's/\(^GRANT ALL PR\)/-- \1/' >/docker-entrypoint-initdb.d/1.sql
+RUN curl \
+    https://raw.githubusercontent.com/spring-petclinic/spring-petclinic-rest/master/src/main/resources/db/mysql/populateDB.sql \
+    --output /docker-entrypoint-initdb.d/2.sql
+
+ENV MYSQL_RANDOM_ROOT_PASSWORD="true" \
+    MYSQL_USER="pc" \
+    MYSQL_PASSWORD="petclinic" \
+    MYSQL_DATABASE="petclinic"
+
