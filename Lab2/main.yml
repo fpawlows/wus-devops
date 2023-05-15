@@ -92,11 +92,10 @@
         allocation_method: Static
       register: public_ip_result
       loop: "{{deployments}}"
-
+  
     - name: Gather public IPs
-      no_log: true
       set_fact:
-        public_ips: "{{ public_ip_result.results | json_query('[].state.ip_address') }}"
+        public_ips: "{{ public_ip_result.results | json_query('[].state.{name: name, ip_address: ip_address}') }}"
     
     - name: Create a network security group
       azure.azcollection.azure_rm_securitygroup:
@@ -165,9 +164,9 @@
       loop: "{{deployments}}"
       register: vm_results
     
-    - name: Print public IPs #TODO disambiguate
+    - name: Print public IPs
       debug:
-        msg: public_ips
+        var: public_ips
 
     
 

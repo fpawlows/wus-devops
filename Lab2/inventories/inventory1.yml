@@ -1,14 +1,14 @@
 all:
   hosts:
     database:
-      ansible_host: "20.126.134.199"
+      ansible_host: "20.229.28.134"
       ansible_user: azureuser
       ansible_ssh_private_key_file: "/home/maks/Lab2.pem"
     backend:
-      ansible_host: "20.126.33.105"
+      ansible_host: "108.142.167.245"
       ansible_user: azureuser
       ansible_ssh_private_key_file: "/home/maks/Lab2.pem"
     frontend:
-      ansible_host: "20.126.5.230"
+      ansible_host: "108.142.167.54"
       ansible_user: azureuser
       ansible_ssh_private_key_file: "/home/maks/Lab2.pem"
