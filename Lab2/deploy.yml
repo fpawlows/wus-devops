@@ -1,0 +1,9 @@
+- hosts: 
+  - all
+  become: true
+  pre_tasks:
+    - name: Update & upgrade
+      apt:
+        update_cache: yes
+        upgrade: dist
+    

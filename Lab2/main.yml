@@ -81,7 +81,7 @@
     - name: Create a virtual network
       azure.azcollection.azure_rm_virtualnetwork:
         resource_group: "{{ resource_group }}"
-        name: myVnet
+        name: "{{ resource_group }}Vnet"
         address_prefixes: "10.40.0.0/16"
       register: vnet_result
 
@@ -92,20 +92,23 @@
         allocation_method: Static
       register: public_ip_result
       loop: "{{deployments}}"
-    # - debug: 
-    #     var: public_ip_result
 
+    - name: Gather public IPs
+      no_log: true
+      set_fact:
+        public_ips: "{{ public_ip_result.results | json_query('[].state.ip_address') }}"
+    
     - name: Create a network security group
       azure.azcollection.azure_rm_securitygroup:
         resource_group: "{{ resource_group }}"
         name: "{{item.name}}NSG"
-        # rules:
-        #   - name: allow_ssh
-        #     protocol: Tcp
-        #     destination_port_range: "22"
-        #     access: Allow
-        #     direction: Inbound
-            # priority: 1000
+        rules: #TODO - modularize
+          - name: allow_ssh
+            protocol: Tcp
+            destination_port_range: "22"
+            access: Allow
+            direction: Inbound
+            priority: 1000
       # register: nsg_result
       loop: "{{deployments}}"
 
@@ -126,7 +129,7 @@
         resource_group: "{{ resource_group }}"
         name: "{{item.name}}Subnet"
         address_prefix: "{{ item.subnet.address_prefixes }}"
-        virtual_network_name: myVnet
+        virtual_network_name: "{{ resource_group }}Vnet"
       # register: subnet_result
       loop: "{{deployments}}"
 
@@ -134,7 +137,7 @@
       azure.azcollection.azure_rm_networkinterface:
         resource_group: "{{ resource_group }}"
         name: "{{item.name}}NIC"
-        virtual_network_name: myVnet
+        virtual_network_name: "{{ resource_group }}Vnet"
         subnet_name: "{{item.name}}Subnet"
         public_ip_name: "{{item.name}}IP"
         security_group_name: "{{ item.name}}NSG"
@@ -149,6 +152,10 @@
         vm_size: "{{ vm_size }}"
         admin_username: "{{ admin_username }}"
         admin_password: "{{ admin_password }}"
+        ssh_password_enabled: false
+        ssh_public_keys:
+        - path: "/home/{{ admin_username }}/.ssh/authorized_keys"
+          key_data: "{{ lookup('file', '/home/maks/Lab2.pem.pub') }}"
         image:
           offer: "{{ image_offer }}"
           publisher: "{{ image_publisher }}"
@@ -158,26 +165,10 @@
       loop: "{{deployments}}"
       register: vm_results
     
-    # - name: Debug
-    #   debug:
-    #     var: vm_results.results
+    - name: Print public IPs #TODO disambiguate
+      debug:
+        msg: public_ips
 
-    - name: Update apt
-      # become: yes
-      command: touch dupa
-      delegate_to: "{{item.name}}IP"
-    #   vars:
-    #     ansible_become_password: "{{ admin_password }}"
-      loop: "{{deployments}}"
-#       apt:
-#         name: xd
-#         # update_cache: yes
-#         upgrade: yes
-#       delegate_to: "140.115.159.99"
-#         # ansible_ssh_user: myuser
-#         # ansible_ssh_pass: mypassword
-#       # delegate_to: "{{ item.name }}IP"
-#       # with_items: "{{deployments}}" 
     
 
 

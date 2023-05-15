@@ -1,3 +1,4 @@
+#!/bin/sh
 sudo apt update -y
 sudo apt upgrade -y
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
