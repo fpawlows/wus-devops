@@ -3,18 +3,12 @@ all:
     database:
       ansible_host: "20.126.134.199"
       ansible_user: azureuser
-      # ansible_password: P@ssw0rd123!
-      # ansible_ssh_private_key_file: "{{ lookup('file', '/home/maks/Lab2.pem') }}"
       ansible_ssh_private_key_file: "/home/maks/Lab2.pem"
     backend:
       ansible_host: "20.126.33.105"
       ansible_user: azureuser
-      # ansible_password: P@ssw0rd123!
       ansible_ssh_private_key_file: "/home/maks/Lab2.pem"
-      # ansible_ssh_private_key_file: "{{ lookup('file', '/home/maks/Lab2.pem') }}"
     frontend:
       ansible_host: "20.126.5.230"
       ansible_user: azureuser
-      # ansible_password: P@ssw0rd123!
       ansible_ssh_private_key_file: "/home/maks/Lab2.pem"
-      # ansible_ssh_private_key_file: "{{ lookup('file', '/home/maks/Lab2.pem') }}"

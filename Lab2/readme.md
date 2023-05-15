@@ -8,7 +8,7 @@ on your local machine
 # Building infrastructure
 Before we start, it's necessary to generate new pair of rsa keys.
 ```
-ssh-keygen Lab2.pem
+ssh-keygen -f Lab2.pem
 ```
 Copy the path to both of the keys and paste the path to public key in `Create a virtual machine` task inside `main.yml` file under `key_data` parameter. Then paste the path to private key into `./inventories/inventory1.yml` under `ansible_ssh_private_key_file` parameter (3 times).
 
