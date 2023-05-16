@@ -1,0 +1,28 @@
+FROM mysql:8-debian
+ENV MYSQL_ROOT_PASSWORD=petclinic
+ENV MYSQL_USER=petclinic
+ENV MYSQL_PASSWORD=petclinic
+ENV MYSQL_DATABASE=petclinic
+
+ARG MYSQL_PORT=4003
+ENV MYSQL_TCP_PORT=$MYSQL_PORT
+
+# Download service database initial files
+RUN apt-get update && apt-get upgrade -y
+RUN apt-get install wget -y
+RUN wget "https://raw.githubusercontent.com/spring-petclinic/spring-petclinic-rest/master/src/main/resources/db/mysql/initDB.sql"
+RUN wget "https://raw.githubusercontent.com/spring-petclinic/spring-petclinic-rest/master/src/main/resources/db/mysql/populateDB.sql"
+
+
+RUN echo "port = $MYSQL_PORT" >> /etc/mysql/mysql.conf.d/mysqld.cnf
+RUN echo "server-id = 1" >> /etc/mysql/mysql.conf.d/mysqld.cnf
+RUN echo "log_bin = /var/log/mysql/mysql-bi.log" >> /etc/mysql/mysql.conf.d/mysqld.cnf
+
+RUN sed -i "s/127.0.0.1/0.0.0.0/g" /etc/mysql/mysql.conf.d/mysqld.cnf
+
+RUN mysql < ./initDB.sql 
+RUN mysql petclinic < ./populateDB.sql
+
+RUN service mysql restart
+RUN mysql -v -e "UNLOCK TABLES;"
+
