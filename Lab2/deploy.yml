@@ -2,8 +2,62 @@
   - all
   become: true
   pre_tasks:
-    - name: Update & upgrade
+    - name: Apt update & upgrade
       apt:
         update_cache: yes
         upgrade: dist
+    - name: Download docker
+      apt:
+        name: docker
+        state: latest
+    - name: Download docker.io
+      apt:
+        name: docker.io
+        state: latest
+    - name: Addgroup docker
+      ansible.builtin.group:
+        name: docker
+        state: present
+    - name: Add azureuser to docker group
+      command: usermod -aG docker azureuser
+
+
+- hosts: database
+  become: true
+  tasks:
+    - name: Transfer dockerfiles
+      copy:
+        src: ./mysql/Dockerfile
+        dest: /home/{{hostvars['database']['ansible_user']}}/Dockerfile
+    - name: docker build
+      command: docker build -t database_docker --build-arg MYSQL_PORT={{hostvars['database']['port']}} .
+    - name: docker run
+      command: sudo docker run --rm -d --network host -p {{hostvars['database']['port']}}:{{hostvars['database']['port']}} database_docker
+
+- hosts: backend
+  become: true
+  tasks:
+    - name: Transfer dockerfiles
+      copy:
+        src: ./backend/Dockerfile
+        dest: /home/{{hostvars['backend']['ansible_user']}}/Dockerfile
+    - name: docker build
+      command: docker build -t backend_docker --build-arg BACKEND_PORT={{hostvars['backend']['port']}} .
+    - name: docker run
+      command: sudo docker run --rm -d --network host -p {{hostvars['backend']['port']}}:{{hostvars['backend']['port']}} -e DB_ADDRESS={{hostvars['database']['ansible_host']}} -e DB_PORT={{hostvars['database']['port']}} backend_docker
+
+
+# - hosts: frontend
+#   become: true
+#   tasks:
+#     - name: Transfer dockerfiles
+#       copy:
+#         src: ./frontend/Dockerfile
+#         dest: dest: /home/{{hostvars['frontend']['ansible_user']}}/Dockerfile
+#     - name: docker build
+#       command: docker build -t backend_docker --build-arg BACKEND_PORT={{hostvars[AAAAAAA]['port']}} .
+#     - name: docker run
+#       command: sudo docker run --rm -d -p {{hostvars[AAAAAAA]['port']}}:hostvars[AAAAAAA]['port'] --network host -e DB_ADDRESS={{hostvars[AAAAAAA]['ansible_host']}} -e DB_PORT={{hostvars[AAAAAAA]['port']}} backend_docker
+
+
     

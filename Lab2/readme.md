@@ -40,3 +40,21 @@ In order to start over you can use
 ansible-playbook cleanup.yml --extra-vars "name=WUSLab2ResourceGroup"
 ```
 Note: replace WUSLab2ResourceGroup with the name of your resource group if you already changed it
+
+# Debugging db
+ssh to database then
+```
+docker container ls
+```
+copy name
+```
+docker logs [name]
+```
+find GENERATED ROOT PASSWORD
+```
+docker exec -it lucid_cerf bash -l
+```
+and enter password to
+```
+mysql -uroot -p
+```

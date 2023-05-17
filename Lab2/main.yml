@@ -9,7 +9,7 @@
     admin_password: P@ssw0rd123!
     image_publisher: Canonical
     image_offer: UbuntuServer
-    image_sku: 16.04-LTS
+    image_sku: 18.04-LTS
     deployments:
     - name: database
       subnet:
@@ -96,32 +96,60 @@
     - name: Gather public IPs
       set_fact:
         public_ips: "{{ public_ip_result.results | json_query('[].state.{name: name, ip_address: ip_address}') }}"
-    
-    - name: Create a network security group
+
+    - name: Create a DB network security group
       azure.azcollection.azure_rm_securitygroup:
         resource_group: "{{ resource_group }}"
-        name: "{{item.name}}NSG"
-        rules: #TODO - modularize
-          - name: allow_ssh
+        name: "databaseNSG"
+        rules:
+          - name: allowSSH
             protocol: Tcp
             destination_port_range: "22"
             access: Allow
             direction: Inbound
             priority: 1000
-      # register: nsg_result
-      loop: "{{deployments}}"
+          - name: openDatabase
+            protocol: Tcp
+            destination_port_range: "3306"
+            access: Allow
+            direction: Inbound
+            priority: 1001
 
-    # - name: Create network security group rule
-    #   azure_rm_securitygroup_rule:
-    #     resource_group: "{{resource_group}}"
-    #     name: "{{item.1.name}}"
-    #     security_group_name: "{{ item.0.name}}NSG"
-    #     protocol: Tcp
-    #     destination_port_range: "{{item.1.destination_port_ranges}}"
-    #     access: Allow
-    #     direction: Inbound
-    #     priority: "{{item.1.priority}}"
-    #   loop: "{{ deployments|product(attribute='subnet.nsg_rules')|list}}"
+    - name: Create a BE network security group
+      azure.azcollection.azure_rm_securitygroup:
+        resource_group: "{{ resource_group }}"
+        name: "backendNSG"
+        rules:
+          - name: allowSSH
+            protocol: Tcp
+            destination_port_range: "22"
+            access: Allow
+            direction: Inbound
+            priority: 1000
+          - name: openBackend
+            protocol: Tcp
+            destination_port_range: "4013"
+            access: Allow
+            direction: Inbound
+            priority: 1001
+            
+    - name: Create a FE network security group
+      azure.azcollection.azure_rm_securitygroup:
+        resource_group: "{{ resource_group }}"
+        name: "frontendNSG"
+        rules:
+          - name: allowSSH
+            protocol: Tcp
+            destination_port_range: "22"
+            access: Allow
+            direction: Inbound
+            priority: 1000
+          - name: openFrontend
+            protocol: Tcp
+            destination_port_range: "8080"
+            access: Allow
+            direction: Inbound
+            priority: 1001
 
     - name: Create a subnet
       azure.azcollection.azure_rm_subnet:
@@ -154,7 +182,7 @@
         ssh_password_enabled: false
         ssh_public_keys:
         - path: "/home/{{ admin_username }}/.ssh/authorized_keys"
-          key_data: "{{ lookup('file', './Lab2.pem.pub') }}"
+          key_data: "{{ lookup('file', '/home/maks/Lab2.pem.pub') }}"
         image:
           offer: "{{ image_offer }}"
           publisher: "{{ image_publisher }}"
