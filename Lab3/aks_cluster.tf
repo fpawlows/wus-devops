@@ -1,3 +1,5 @@
+resource "random_pet" "prefix" {}
+
 resource "azurerm_kubernetes_cluster" "default" {
   name                = "${random_pet.prefix.id}-aks"
   location            = azurerm_resource_group.WUS3RG.location
@@ -11,9 +13,12 @@ resource "azurerm_kubernetes_cluster" "default" {
     os_disk_size_gb = 30
   }
 
-  service_principal {
-    client_id     = var.appId
-    client_secret = var.password
+#   service_principal {
+#     client_id     = var.appId
+#     client_secret = var.password
+#   }
+  identity {
+    type = "SystemAssigned"
   }
 
   role_based_access_control_enabled = true
